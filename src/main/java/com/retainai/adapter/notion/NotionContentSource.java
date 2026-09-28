@@ -1,8 +1,11 @@
 package com.retainai.adapter.notion;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.retainai.adapter.ContentSource;
 import com.retainai.domain.Article;
 import org.springframework.stereotype.Component;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.util.List;
 
@@ -37,9 +40,33 @@ public class NotionContentSource implements ContentSource {
     }
 
     @Override
-    public List<Article> fetchReadyArticles() {
+    public List<Article> fetchReadyArticles() throws JsonProcessingException {
         // TODO: query the Notion database, filter to your "ready to review"
         // checkbox/status, map each page to an Article via NotionClient.
+        ObjectMapper objectMapper = new ObjectMapper();
+        List<String> filterProperties = List.of("Topic", "Resource Link", "Tag");
+        JsonNode notionResponse = objectMapper.readTree(notionClient.queryDatabase(null));
+        for (JsonNode page : notionResponse.get("results")) {
+            String pageId = page.get("id").asText();
+//            String title = page.get("properties").get("Reading List").get("title").get(0).get("text").get("content").asText();
+//            String sourceUrl = page.get("properties").get("Resource Link").get("url").asText();
+//            List<String> tags = objectMapper.convertValue(page.get("properties").get("Tag").get("multi_select"), List.class);
+
+//            Article article = new Article();
+//            article.setSourceName(sourceName());
+//            article.setExternalId(pageId);
+//            article.setTitle(title);
+//            article.setSourceUrl(sourceUrl);
+//            article.setTags(tags);
+
+            // Fetch the content as Markdown
+            String markdownResponse = notionClient.getPageAsMarkdown(pageId);
+            ObjectMapper markdownMapper = new ObjectMapper();
+            JsonNode markdownNode = markdownMapper.readTree(markdownResponse);
+            String markdownContent = markdownNode.get("markdown").asText();
+            System.out.println("Fetched Markdown content for page " + pageId + ": " + markdownContent.substring(0, Math.min(100, markdownContent.length())) + "...");
+//            article.setContent(markdownContent);
+        }
         throw new UnsupportedOperationException("TODO: implement Notion fetch + mapping");
     }
 

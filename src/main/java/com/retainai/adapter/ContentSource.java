@@ -1,5 +1,6 @@
 package com.retainai.adapter;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.retainai.domain.Article;
 
 import java.util.List;
@@ -26,7 +27,7 @@ public interface ContentSource {
      * Implementations own their own pagination/rate-limit handling; callers
      * just get a flat list back.
      */
-    List<Article> fetchReadyArticles();
+    List<Article> fetchReadyArticles() throws JsonProcessingException;
 
     /**
      * Optional: push review status back to the source (e.g. update a Notion

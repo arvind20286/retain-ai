@@ -2,3 +2,7 @@
 out/
 target/
 *.class
+.env
+.env.*
+!.env.example
+*.env

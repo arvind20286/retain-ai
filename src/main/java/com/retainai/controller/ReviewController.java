@@ -1,5 +1,6 @@
 package com.retainai.controller;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.retainai.adapter.ContentSource;
 import com.retainai.domain.ReviewCard;
 import com.retainai.service.ReviewOrchestrator;
@@ -25,7 +26,11 @@ public class ReviewController {
         // TODO: fetch via notionContentSource.fetchReadyArticles(), upsert into
         // ArticleRepository, generate ReviewCards for any new articles via
         // QuestionGeneratorService.
-        notionContentSource.fetchReadyArticles();
+        try {
+            notionContentSource.fetchReadyArticles();
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     /** What's due right now — drives the voice session's question queue. */
