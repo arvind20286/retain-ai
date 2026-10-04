@@ -7,6 +7,7 @@ import com.retainai.domain.Article;
 import org.springframework.stereotype.Component;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -43,31 +44,49 @@ public class NotionContentSource implements ContentSource {
     public List<Article> fetchReadyArticles() throws JsonProcessingException {
         // TODO: query the Notion database, filter to your "ready to review"
         // checkbox/status, map each page to an Article via NotionClient.
+        List<Article> articleList = new ArrayList<>();
         ObjectMapper objectMapper = new ObjectMapper();
         List<String> filterProperties = List.of("Topic", "Resource Link", "Tag");
-        JsonNode notionResponse = objectMapper.readTree(notionClient.queryDatabase(null));
+        JsonNode notionResponse = objectMapper.readTree(notionClient.queryDatasource(null));
         for (JsonNode page : notionResponse.get("results")) {
             String pageId = page.get("id").asText();
-//            String title = page.get("properties").get("Reading List").get("title").get(0).get("text").get("content").asText();
-//            String sourceUrl = page.get("properties").get("Resource Link").get("url").asText();
-//            List<String> tags = objectMapper.convertValue(page.get("properties").get("Tag").get("multi_select"), List.class);
+            JsonNode properties = page.get("properties");
+            String topic = properties.get("Topic").get("title").get(0).get("plain_text").asText("");
+            if(topic.isEmpty()){
+                System.out.println("Topic not present for page-id: "+pageId);
+            }
+            String sourceUrl = properties.get("Resource Link").get("url").asText("");
 
-//            Article article = new Article();
-//            article.setSourceName(sourceName());
-//            article.setExternalId(pageId);
-//            article.setTitle(title);
-//            article.setSourceUrl(sourceUrl);
-//            article.setTags(tags);
+            JsonNode multiSelect = properties.get("Tag").get("multi_select");
 
-            // Fetch the content as Markdown
+            List<String> tags = new ArrayList<>();
+            if(multiSelect.isArray()){
+                for(JsonNode select : multiSelect){
+                    tags.add(select.get("name").asText(""));
+                }
+            }
+
             String markdownResponse = notionClient.getPageAsMarkdown(pageId);
             ObjectMapper markdownMapper = new ObjectMapper();
             JsonNode markdownNode = markdownMapper.readTree(markdownResponse);
-            String markdownContent = markdownNode.get("markdown").asText();
+            String markdownContent = markdownNode.get("markdown").asText("");
             System.out.println("Fetched Markdown content for page " + pageId + ": " + markdownContent.substring(0, Math.min(100, markdownContent.length())) + "...");
-//            article.setContent(markdownContent);
+            Article article = new Article();
+            article.setPageId(pageId);
+            article.setTitle(topic);
+            if(!tags.isEmpty()){
+                article.setTags(tags);
+            }
+            if(!sourceUrl.isEmpty()) {
+                article.setSourceUrl(sourceUrl);
+            }
+            if(!markdownContent.isEmpty()) {
+                article.setContent(markdownContent);
+            }
+            article.setSourceName(this.sourceName());
+            articleList.add(article);
         }
-        throw new UnsupportedOperationException("TODO: implement Notion fetch + mapping");
+        return articleList;
     }
 
     @Override

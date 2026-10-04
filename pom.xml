@@ -20,7 +20,7 @@
     <properties>
         <java.version>17</java.version>
         <!-- Check Maven Central for the latest google-genai release before building -->
-        <google-genai.version>1.58.0</google-genai.version>
+        <google-genai.version>1.73.0</google-genai.version>
     </properties>
 
     <dependencies>

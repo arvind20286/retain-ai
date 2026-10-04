@@ -6,3 +6,6 @@ target/
 .env.*
 !.env.example
 *.env
+*.github
+.github/
+learning/

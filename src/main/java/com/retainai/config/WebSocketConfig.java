@@ -3,6 +3,9 @@ package com.retainai.config;
 import com.retainai.service.ReviewOrchestrator;
 import com.retainai.voice.GeminiLiveClient;
 import com.retainai.voice.LiveVoiceSessionHandler;
+import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.socket.config.annotation.EnableWebSocket;
@@ -13,17 +16,21 @@ import org.springframework.web.socket.config.annotation.WebSocketHandlerRegistry
 @EnableWebSocket
 public class WebSocketConfig implements WebSocketConfigurer {
 
-    private final ReviewOrchestrator reviewOrchestrator;
-    private final GeminiLiveClient geminiLiveClient;
+    private ReviewOrchestrator reviewOrchestrator;
+    private String apiKey;
+    private String modelName;
+    private String systemPromptPath;
 
-    public WebSocketConfig(ReviewOrchestrator reviewOrchestrator, GeminiLiveClient geminiLiveClient) {
+    public WebSocketConfig(@Value("${gemini.model-name}") String modelId, @Value("${gemini.api-key}") String apiKey, @Value("${gemini.system-prompt:}") String systemPromptPath, ReviewOrchestrator reviewOrchestrator){
         this.reviewOrchestrator = reviewOrchestrator;
-        this.geminiLiveClient = geminiLiveClient;
+        this.apiKey = apiKey;
+        this.modelName = modelId;
+        this.systemPromptPath = systemPromptPath;
     }
 
     @Bean
     public LiveVoiceSessionHandler liveVoiceSessionHandler() {
-        return new LiveVoiceSessionHandler(reviewOrchestrator, geminiLiveClient);
+        return new LiveVoiceSessionHandler(this.modelName, this.apiKey, this.systemPromptPath, this.reviewOrchestrator);
     }
 
     @Override

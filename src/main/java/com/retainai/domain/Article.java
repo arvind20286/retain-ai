@@ -1,9 +1,8 @@
 package com.retainai.domain;
 
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
+import org.checkerframework.common.aliasing.qual.Unique;
 
 import java.util.List;
 
@@ -14,8 +13,8 @@ import java.util.List;
  */
 @Entity
 @Table(name = "articles")
-@Getter
-@Setter
+@Data
+@AllArgsConstructor
 @NoArgsConstructor
 public class Article {
 
@@ -23,11 +22,11 @@ public class Article {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Unique
+    private String pageId;
+
     /** Which ContentSource this came from, e.g. "notion". */
     private String sourceName;
-
-    /** The source system's own id for this item (Notion page id, etc). */
-    private String externalId;
 
     private String title;
     private String sourceUrl;

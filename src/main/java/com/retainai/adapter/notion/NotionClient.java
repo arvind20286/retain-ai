@@ -43,7 +43,7 @@ public class NotionClient {
      * TODO: add a filter for your "ready to review" property, handle
      * pagination via the response's has_more/next_cursor fields.
      */
-    public String queryDatabase(List<String> filterProperties) {
+    public String queryDatasource(List<String> filterProperties) {
         String uri = "/data_sources/{id}/query";
         if(filterProperties != null && !filterProperties.isEmpty()) {
             Stream<String> filterStream = filterProperties.stream().map(prop -> "filter_properties[]=" + prop);
